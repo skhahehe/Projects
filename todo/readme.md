@@ -20,7 +20,7 @@ Only your text and tasks are visible — no borders, no HUD, no background.
 ## 📦 Setup Instructions
 
 1. Open the project in **Xcode** by your own methods and use given swift files
-2. run the app from either xcode or the todo.app.
+2. run the app from either xcode or the install todo.app from dmg.
 3.  Add tasks by typing and pressing `Enter`.
 
 ---
