@@ -1,7 +1,7 @@
 # 🎬 YouTubeDownloader GUI (macOS & Cross-platform)
 
 A user-friendly graphical interface for downloading YouTube videos using Python, `tkinter`, and `yt-dlp`. This app supports multiple URLs, progress feedback, optional `cookies.txt`, and can run smoothly on macOS and other platforms.
-
+.App already included and .DMG too. .exe Coming soon ❣️  
 ---
 
 ## 🖥️ Features
