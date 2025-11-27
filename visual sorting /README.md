@@ -117,10 +117,5 @@ g++ -I C:\SFML-3.0.2\include -L C:\SFML-3.0.2\lib main.cpp -o SortVisualizer.exe
 | Quick Sort | $O(n \log n)$ | $O(\log n)$ | Fast, divide-and-conquer strategy. |
 | Merge Sort | $O(n \log n)$ | $O(n)$ | Stable sort, guarantees $O(n \log n)$ performance. |
 
-## 👤 Author
-
-- **Name**: [Your Name]
-- **Project**: Data Structures & Algorithms End Term Project
-- **Date**: [Current Date - 27 November 2025]
 
 Built with ❤️ and C++
