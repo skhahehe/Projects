@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/macbookpro/Desktop/project/Projects/visual sorting ",
-      "program": "/Users/macbookpro/Desktop/project/Projects/visual sorting /build/Debug/outDebug"
+      "cwd": ".",
+      "program": "build/Debug/outDebug"
     }
   ]
 }
