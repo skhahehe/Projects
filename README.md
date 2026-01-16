@@ -6,6 +6,10 @@
 💻 I'm constantly learning and trying out new things, so expect a mix of different technologies and ideas here!
 
 # Listed Below
-[GESTURE CONTROLLED HILL CLIMB RACING](./adb)  
+[GESTURE CONTROLLED HILL CLIMB RACING](./adb) 
+
 [TRANSPARENT TO DO APP FOR MACOS](./todo)  
+
 [YOUTUBE VIDEO DOWNLOADER](./YoutubeVideoDownloader)
+
+[SORTING ALGORITHM VISUALIZER](./visualsorting)
