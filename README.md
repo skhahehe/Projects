@@ -13,3 +13,5 @@
 [YOUTUBE VIDEO DOWNLOADER](./YoutubeVideoDownloader)
 
 [SORTING ALGORITHM VISUALIZER](./visualsorting/)
+
+[STUDENT DATABASE MANAGER](./StudentManager/)
