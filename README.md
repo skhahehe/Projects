@@ -12,4 +12,4 @@
 
 [YOUTUBE VIDEO DOWNLOADER](./YoutubeVideoDownloader)
 
-[SORTING ALGORITHM VISUALIZER](./visualsorting)
+[SORTING ALGORITHM VISUALIZER](./visualsorting/)
