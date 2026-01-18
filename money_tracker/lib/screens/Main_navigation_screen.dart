@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'home_screen.dart';
 import 'transaction_overview_screen.dart';
 import 'category_screen.dart';
+import 'settings_screen.dart';
 import '../widgets/add_transaction_sheet.dart';
+import '../widgets/bounce_button.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -16,58 +17,77 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    HomeScreen(),                // Last 15 days
-    TransactionOverviewScreen(), // 365 days
-    CategoryScreen(),            // Categories
+    HomeScreen(),
+    TransactionOverviewScreen(),
+    CategoryScreen(),
+    SettingsScreen(),
   ];
 
   void _openAddTransactionSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const AddTransactionSheet(),
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddTransactionSheet(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex >= 2 ? _currentIndex + 1 : _currentIndex,
-        onTap: (index) {
-          if (index == 2) {
-            _openAddTransactionSheet(); // + button
-            return;
-          }
-
-          setState(() {
-            _currentIndex = index > 2 ? index - 1 : index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Expenses',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle, size: 40),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: 'Categories',
-          ),
-        ],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            BounceButton(
+              onTap: () => setState(() => _currentIndex = 0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.home, color: _currentIndex == 0 ? Colors.blue : Colors.grey),
+              ),
+            ),
+            BounceButton(
+              onTap: () => setState(() => _currentIndex = 1),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.list_alt, color: _currentIndex == 1 ? Colors.blue : Colors.grey),
+              ),
+            ),
+            const SizedBox(width: 48), // Space for floating button
+            BounceButton(
+              onTap: () => setState(() => _currentIndex = 2),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.category, color: _currentIndex == 2 ? Colors.blue : Colors.grey),
+              ),
+            ),
+            BounceButton(
+              onTap: () => setState(() => _currentIndex = 3),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.settings, color: _currentIndex == 3 ? Colors.blue : Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: BounceButton(
+        onTap: _openAddTransactionSheet,
+        child: FloatingActionButton(
+          onPressed: null, // Handled by BounceButton
+          heroTag: 'main_nav_fab',
+          shape: const CircleBorder(),
+          tooltip: 'Add Transaction',
+          child: const Icon(Icons.add),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

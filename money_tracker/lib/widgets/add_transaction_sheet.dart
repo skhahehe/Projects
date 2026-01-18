@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/finance_provider.dart';
+import '../models/transaction_model.dart';
+import '../widgets/bounce_button.dart';
 
 class AddTransactionSheet extends StatefulWidget {
   const AddTransactionSheet({super.key});
@@ -8,85 +12,166 @@ class AddTransactionSheet extends StatefulWidget {
 }
 
 class _AddTransactionSheetState extends State<AddTransactionSheet> {
-  bool isExpense = true;
+  final _amountController = TextEditingController();
+  bool _isIncome = true;
+  String? _selectedCategory;
+  DateTime _selectedDate = DateTime.now();
 
-  final List<String> expenseCategories = [
-    'Food',
-    'Transport',
-    'Rent',
-    'Shopping',
-  ];
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
 
-  final List<String> incomeCategories = [
-    'Salary',
-    'Bonus',
-    'Freelance',
-  ];
+  /// 🛡️ LAYER 1: UI Constraint
+  /// Prevents the user from even seeing future dates in the picker.
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate.isAfter(now) ? now : _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: now, // Business Rule: Cannot select future dates.
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final categories = isExpense ? expenseCategories : incomeCategories;
+    final finance = context.watch<FinanceProvider>();
+    final categories = finance.categories.where((c) => c.isIncome == _isIncome).toList();
+    
+    // Set default category
+    if (_selectedCategory == null && categories.isNotEmpty) {
+      _selectedCategory = categories.first.name;
+    } else if (_selectedCategory != null && !categories.any((c) => c.name == _selectedCategory)) {
+      _selectedCategory = categories.isNotEmpty ? categories.first.name : null;
+    }
 
-    return Padding(
+    return Container(
       padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
         left: 16,
         right: 16,
         top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Add Transaction',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-
-          const SizedBox(height: 12),
-
-          // Expense / Income toggle
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ChoiceChip(
-                label: const Text('Expense'),
-                selected: isExpense,
-                onSelected: (_) => setState(() => isExpense = true),
-              ),
-              const SizedBox(width: 10),
-              ChoiceChip(
-                label: const Text('Income'),
-                selected: !isExpense,
-                onSelected: (_) => setState(() => isExpense = false),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // Categories
-          GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 0.9,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'New Transaction',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            itemCount: categories.length,
-            itemBuilder: (_, index) {
-              return Column(
-                children: [
-                  CircleAvatar(
-                    child: Text(categories[index][0]),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(categories[index]),
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 20),
+            SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment(value: true, label: Text('Income'), icon: Icon(Icons.add)),
+                ButtonSegment(value: false, label: Text('Expense'), icon: Icon(Icons.remove)),
+              ],
+              selected: {_isIncome},
+              onSelectionChanged: (val) {
+                setState(() {
+                  _isIncome = val.first;
+                  _selectedCategory = null;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Amount',
+                prefixText: '\$ ',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (categories.isNotEmpty)
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+                items: categories.map((c) {
+                  return DropdownMenuItem(value: c.name, child: Text(c.name));
+                }).toList(),
+                onChanged: (val) => setState(() => _selectedCategory = val),
+              )
+            else
+              const Text('No categories found.', style: TextStyle(color: Colors.red)),
+            const SizedBox(height: 16),
+            ListTile(
+              title: Text('Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: _pickDate,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            if (finance.isFutureDate(_selectedDate))
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text(
+                  '⚠️ This date is in the future. Please select today or a past date.',
+                  style: TextStyle(color: Colors.orange, fontSize: 12),
+                ),
+              ),
+            const SizedBox(height: 24),
+            BounceButton(
+              onTap: () {
+                final amount = double.tryParse(_amountController.text);
+                
+                // 🛡️ LAYER 2: Explicit UI Guard
+                // Final check before state mutation.
+                if (finance.isFutureDate(_selectedDate)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('❌ You cannot add transactions for future dates.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+  
+                if (amount != null && amount > 0 && _selectedCategory != null) {
+                  final transaction = TransactionModel(
+                    amount: amount,
+                    date: _selectedDate,
+                    isIncome: _isIncome,
+                    category: _selectedCategory!,
+                  );
+                  context.read<FinanceProvider>().addTransaction(transaction);
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid amount and select a category')),
+                  );
+                }
+              },
+              child: ElevatedButton(
+                onPressed: null, // Handled by BounceButton
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Save Transaction', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
