@@ -22,8 +22,8 @@ class MonthlyTransactionCalendar extends StatelessWidget {
     final startOffset = firstDayOfMonth.weekday - 1;
 
     // --- AESTHETIC CONTROLS (GRID) ---
-    const double horizontalPadding = 110.0; // 👈 Boxes are now tiny!
-    const double gridSpacing = 2.0;         // 👈 Tighter spacing
+    const double horizontalPadding = 40.0; // 👈 Larger boxes! (Reduced from 110)
+    const double gridSpacing = 4.0;         // 👈 Slightly more air
     const double boxShape = 1.0;            // 👈 Perfect square
 
     return Container(
@@ -104,7 +104,7 @@ class _CalendarCell extends StatelessWidget {
     final bool isHeatmap = !isFuture && total > 0;
 
     // --- AESTHETIC CONTROLS (CELLS) ---
-    const double dayTextSize = 22.0;       // 👈 Extra large text
+    const double dayTextSize = 13.0;       // 👈 Adjusted for better fit in larger boxes
     const double cornerRadius = 6.0;      // 👈 Roundness of corners
     const double colorIntensity = 0.9;    // 👈 0.0 to 1.0 (vibrancy of fills)
 
@@ -119,13 +119,13 @@ class _CalendarCell extends StatelessWidget {
         color: isHeatmap 
             ? null 
             : isEmptyPast 
-                ? Colors.grey.withOpacity(0.12) 
+                ? Colors.grey.withValues(alpha: 0.12) 
                 : isFuture 
-                    ? Colors.grey.withOpacity(0.06) 
-                    : Colors.white.withOpacity(isDark ? 0.05 : 1.0),
+                    ? Colors.grey.withValues(alpha: 0.06) 
+                    : Colors.white.withValues(alpha: isDark ? 0.05 : 1.0),
         borderRadius: BorderRadius.circular(cornerRadius),
         border: Border.all(
-          color: isHeatmap ? Colors.black.withOpacity(0.1) : Colors.transparent,
+          color: isHeatmap ? Colors.black.withValues(alpha: 0.1) : Colors.transparent,
           width: 0.5,
         ),
       ),
@@ -137,11 +137,11 @@ class _CalendarCell extends StatelessWidget {
               children: [
                 Expanded(
                   flex: (incomePercent * 100).toInt(),
-                  child: Container(color: Colors.green.withOpacity(colorIntensity)),
+                  child: Container(color: Colors.green.withValues(alpha: colorIntensity)),
                 ),
                 Expanded(
                   flex: (expensePercent * 100).toInt(),
-                  child: Container(color: Colors.red.withOpacity(colorIntensity)),
+                  child: Container(color: Colors.red.withValues(alpha: colorIntensity)),
                 ),
               ],
             ),

@@ -1,8 +1,8 @@
-# Sorting Algorithm Visualizer 📊
+# Sorting Algorithm Visualizer 
 
 A high-performance, interactive educational tool built with C++ and SFML 3.0 to visualize how different sorting algorithms operate in real-time. This project was developed as a Data Structures & Algorithms (DSA) End Term Project.
 
-## 🚀 Features
+##  Features
 
 ### 5 Sorting Algorithms:
 
@@ -24,14 +24,14 @@ Watch bars swap (Red), compare (Yellow), and lock into place (Green).
 - **New Array**: Allows entering a fresh dataset without restarting the app.
 - **Data Display**: Values are displayed at the base of each bar for clarity.
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Language**: C++ (C++17 standard)
 - **Graphics Library**: SFML 3.0.2 (Simple and Fast Multimedia Library)
 - **Build System**: GNU Make (macOS) / MinGW g++ (Windows)
 - **Platform**: macOS & Windows
 
-## 🍎 macOS Setup
+##  macOS Setup
 
 ### Prerequisites
 
@@ -60,7 +60,7 @@ open SortVisualizer.app
 make clean
 ```
 
-## 🪟 Windows Setup
+##  Windows Setup
 
 Running C++ with external libraries on Windows requires a bit more manual setup than macOS.
 
@@ -93,7 +93,7 @@ g++ -I C:\SFML-3.0.2\include -L C:\SFML-3.0.2\lib main.cpp -o SortVisualizer.exe
 .\SortVisualizer.exe
 ```
 
-## 🎮 How to Use
+##  How to Use
 
 1. **Input Data**: Upon launching, type a sequence of space-separated numbers (e.g., `50 100 25 75 10`) and press Enter.
 2. **Select Algorithm**: Click on any of the algorithm buttons (Bubble, Insertion, etc.) at the top.
@@ -107,7 +107,7 @@ g++ -I C:\SFML-3.0.2\include -L C:\SFML-3.0.2\lib main.cpp -o SortVisualizer.exe
 - **Reset**: Click to restart the sort with the same numbers.
 - **New Array**: Click to go back to the input screen.
 
-## 🧠 Algorithm Complexity Overview
+##  Algorithm Complexity Overview
 
 | Algorithm | Time (Avg) | Space | Description |
 |-----------|-----------|-------|-------------|

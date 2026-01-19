@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
 import '../providers/finance_provider.dart';
 import '../widgets/bounce_button.dart';
 
@@ -12,6 +14,17 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final TextEditingController _newUserBuilder = TextEditingController();
+
+  Future<void> _pickProfileImage(FinanceProvider finance) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      finance.setUserImage(finance.currentUser, result.files.single.path);
+    }
+  }
 
   void _showAddUserDialog() {
     showDialog(
@@ -59,11 +72,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   children: [
                     ...finance.users.map((user) => ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: finance.currentUser == user ? Colors.blue : Colors.grey.shade300,
-                            child: Text(user[0], style: const TextStyle(color: Colors.white)),
+                          leading: BounceButton(
+                            onTap: finance.currentUser == user ? () => _pickProfileImage(finance) : null,
+                            child: CircleAvatar(
+                              backgroundColor: finance.currentUser == user ? Colors.blue : Colors.grey.shade200,
+                              backgroundImage: finance.userImages[user] != null
+                                  ? FileImage(File(finance.userImages[user]!))
+                                  : null,
+                              child: finance.userImages[user] == null
+                                  ? Icon(
+                                      finance.currentUser == user ? Icons.add_a_photo : Icons.person,
+                                      size: 18,
+                                      color: finance.currentUser == user ? Colors.white : Colors.grey,
+                                    )
+                                  : null,
+                            ),
                           ),
                           title: Text(user, style: TextStyle(fontWeight: finance.currentUser == user ? FontWeight.bold : FontWeight.normal)),
+                          subtitle: finance.currentUser == user ? const Text('Tap icon to change image', style: TextStyle(fontSize: 10)) : null,
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [

@@ -1,16 +1,50 @@
-# money_tracker
 
-A new Flutter project.
+## Features
 
-## Getting Started
+- Track income and expenses
+- Categorize transactions
+- View spending analytics and reports
+- Budget management and monitoring
+- Transaction history and filtering
+- Data persistence with local storage
 
-This project is a starting point for a Flutter application.
+## Project Structure
 
-A few resources to get you started if this is your first Flutter project:
+```
+lib/
+├── main.dart           # Application entry point
+├── models/             # Data models
+├── providers/          # State management
+├── screens/            # UI screens
+├── services/           # Business logic and APIs
+└── widgets/            # Reusable UI components
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Prerequisites
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter SDK (latest stable version)
+- Dart SDK
+- Android Studio / Xcode (for emulator/device testing)
+
+## Installation
+
+1. Clone the repository
+2. Run `flutter pub get` to install dependencies
+3. Run `flutter run` to start the application
+
+## Supported Platforms
+
+- Android
+- iOS
+- Web
+- Windows
+- Linux
+- macOS
+
+## Contributing
+
+Contributions are welcome. Please follow Flutter best practices and submit pull requests for review.
+
+## License
+
+This project is open source and available under the MIT License.

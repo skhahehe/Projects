@@ -5,37 +5,37 @@ This application provides a modern GUI to manage students, view class-wise recor
 
 ---
 
-## 📌 Features
+##  Features
 
-- 🎓 **Add Students**
+-  **Add Students**
   - Roll Number
   - Full Name
   - Class (1–12)
   - Category (e.g. CS, Bio, Pre-Eng)
 
-- 🏫 **View Students by Class**
+- **View Students by Class**
   - Class-wise grid (Class 1–12)
   - Table-style display with:
     - Registration Number
     - Student Name
     - Category
 
-- 🔍 **Search Student**
+-  **Search Student**
   - Search by Roll Number
   - Instant result feedback
 
-- ❌ **Delete Student**
+-  **Delete Student**
   - Remove student by Roll Number
   - Safe deletion from linked list
 
-- 🖱️ **Modern GUI**
+-  **Modern GUI**
   - Hover effects
   - Buttons and input boxes
   - Notifications for success and errors
 
 ---
 
-## 🛠 Technologies Used
+##  Technologies Used
 
 - **Language:** C++ (Modern C++)
 - **GUI Library:** SFML 3.0
@@ -48,7 +48,7 @@ This application provides a modern GUI to manage students, view class-wise recor
 
 ---
 
-## 🧠 Internal Design
+##  Internal Design
 
 ### Core Classes
 
@@ -75,7 +75,7 @@ DELETE_STUDENT
 ---
 
 ## How to Build & Run
-### 1️⃣ Install SFML 3.0
+### 1️ Install SFML 3.0
 
 Make sure SFML 3.0 is installed and properly linked.
 
@@ -85,20 +85,20 @@ sudo apt install libsfml-dev
 ### macOS (Homebrew)
 brew install sfml
 
-### 2️⃣ Compile
+### 2️ Compile
 g++ main.cpp -o student_system \
 -lsfml-graphics -lsfml-window -lsfml-system
 
-### 3️⃣ Run
+### 3️ Run
 ./student_system
 
 
-📜 License
+ License
 
 This project is open for educational and personal use.
 Feel free to modify, enhance, and extend it.
 
-👤 Author
+ Author
 
 Sarmad Durrani
 SFML & C++ GUI Project

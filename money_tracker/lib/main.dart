@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/finance_provider.dart';
-import 'screens/main_navigation_screen.dart';
 import 'screens/loading_screen.dart';
 
 void main() {
@@ -23,7 +22,7 @@ class MyApp extends StatelessWidget {
     return Consumer<FinanceProvider>(
       builder: (context, finance, child) {
         return MaterialApp(
-          title: 'Money Tracker',
+          title: 'Money Map',
           debugShowCheckedModeBanner: false,
           themeMode: finance.themeMode,
           theme: ThemeData(

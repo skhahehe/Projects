@@ -15,7 +15,14 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   final _amountController = TextEditingController();
   bool _isIncome = true;
   String? _selectedCategory;
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _selectedDate = DateTime(now.year, now.month, now.day);
+  }
 
   @override
   void dispose() {
@@ -27,11 +34,12 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   /// Prevents the user from even seeing future dates in the picker.
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate.isAfter(now) ? now : _selectedDate,
+      initialDate: _selectedDate,
       firstDate: DateTime(2000),
-      lastDate: now, // Business Rule: Cannot select future dates.
+      lastDate: today, // Business Rule: Cannot select future dates.
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
@@ -44,11 +52,13 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
     final categories = finance.categories.where((c) => c.isIncome == _isIncome).toList();
     
     // Set default category
-    if (_selectedCategory == null && categories.isNotEmpty) {
-      _selectedCategory = categories.first.name;
-    } else if (_selectedCategory != null && !categories.any((c) => c.name == _selectedCategory)) {
-      _selectedCategory = categories.isNotEmpty ? categories.first.name : null;
-    }
+    _selectedCategory ??= categories.isNotEmpty ? categories.first.name : null;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isToday = _selectedDate.year == today.year && 
+                   _selectedDate.month == today.month && 
+                   _selectedDate.day == today.day;
 
     return Container(
       padding: EdgeInsets.only(
@@ -112,7 +122,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               const Text('No categories found.', style: TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
             ListTile(
-              title: Text('Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
+              title: Text(isToday ? 'Date: Today' : 'Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDate,
               shape: RoundedRectangleBorder(
@@ -160,14 +170,16 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   );
                 }
               },
-              child: ElevatedButton(
-                onPressed: null, // Handled by BounceButton
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+              child: IgnorePointer(
+                child: ElevatedButton(
+                  onPressed: () {}, // Simply provide a dummy to keep it enabled visually
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Save Transaction', style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text('Save Transaction', style: TextStyle(fontSize: 16)),
               ),
             ),
           ],

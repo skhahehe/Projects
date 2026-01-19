@@ -19,9 +19,9 @@ class BounceButton extends StatefulWidget {
 }
 
 class _BounceButtonState extends State<BounceButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-  late Animation<double> _translation;
+  AnimationController? _controller;
+  Animation<double>? _scale;
+  Animation<double>? _translation;
 
   @override
   void initState() {
@@ -32,40 +32,48 @@ class _BounceButtonState extends State<BounceButton> with SingleTickerProviderSt
     );
     
     _scale = Tween<double>(begin: 1.0, end: widget.scaleBy).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+      CurvedAnimation(parent: _controller!, curve: Curves.easeOutBack),
     );
     
     _translation = Tween<double>(begin: 0.0, end: widget.translateY).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+      CurvedAnimation(parent: _controller!, curve: Curves.easeOutBack),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   void _onTapDown(TapDownDetails details) {
     if (widget.onTap != null) {
-      _controller.forward();
+      _controller?.forward();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
     if (widget.onTap != null) {
-      _controller.reverse();
+      _controller?.reverse();
     }
   }
 
   void _onTapCancel() {
     if (widget.onTap != null) {
-      _controller.reverse();
+      _controller?.reverse();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+    final scale = _scale;
+    final translation = _translation;
+
+    if (controller == null || scale == null || translation == null) {
+      return widget.child;
+    }
+
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
@@ -73,12 +81,12 @@ class _BounceButtonState extends State<BounceButton> with SingleTickerProviderSt
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedBuilder(
-        animation: _controller,
+        animation: controller,
         builder: (context, child) {
           return Transform.translate(
-            offset: Offset(0, _translation.value),
+            offset: Offset(0, translation.value),
             child: Transform.scale(
-              scale: _scale.value,
+              scale: scale.value,
               child: child,
             ),
           );

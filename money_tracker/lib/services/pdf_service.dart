@@ -27,7 +27,7 @@ class PdfService {
       
       final bool success = await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
-        name: 'Money_Tracker_Statement_${periodTitle.replaceAll(' ', '_')}.pdf',
+        name: 'Money_Map_Statement_${periodTitle.replaceAll(' ', '_')}.pdf',
       );
 
       if (!success) {
@@ -66,7 +66,7 @@ class PdfService {
       periodTitle,
     );
     final bytes = await pdf.save();
-    final fileName = 'Money_Tracker_Statement_${periodTitle.replaceAll(' ', '_')}.pdf';
+    final fileName = 'Money_Map_Statement_${periodTitle.replaceAll(' ', '_')}.pdf';
 
     if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
       try {
@@ -147,7 +147,7 @@ class PdfService {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'Money Tracker Statement',
+          'Money Map Statement',
           style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
         ),
         pw.SizedBox(height: 4),

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/finance_provider.dart';
 import '../services/pdf_service.dart';
 import '../widgets/bounce_button.dart';
-import '../models/transaction_model.dart';
 
 class StatementExportDialog extends StatefulWidget {
   const StatementExportDialog({super.key});
@@ -14,32 +13,36 @@ class StatementExportDialog extends StatefulWidget {
 
 class _StatementExportDialogState extends State<StatementExportDialog> {
   String _selectedPreset = '3m'; // Default to Last 3 Months
-  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 90));
-  DateTime _toDate = DateTime.now();
-  
-  final DateTime _maxBackDate = DateTime.now().subtract(const Duration(days: 365 * 5));
-  final DateTime _today = DateTime.now();
+  late DateTime _fromDate;
+  late DateTime _toDate;
+  late DateTime _today;
+  late DateTime _maxBackDate;
 
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    _today = DateTime(now.year, now.month, now.day);
+    _maxBackDate = _today.subtract(const Duration(days: 365 * 5));
     _updateDatesFromPreset('3m');
   }
 
   void _updateDatesFromPreset(String preset) {
-    final now = DateTime.now();
     setState(() {
       _selectedPreset = preset;
-      _toDate = now;
+      _toDate = _today;
       if (preset == '2m') {
-        _fromDate = DateTime(now.year, now.month - 2, now.day);
+        _fromDate = DateTime(_today.year, _today.month - 2, _today.day);
       } else if (preset == '3m') {
-        _fromDate = DateTime(now.year, now.month - 3, now.day);
+        _fromDate = DateTime(_today.year, _today.month - 3, _today.day);
       } else if (preset == '6m') {
-        _fromDate = DateTime(now.year, now.month - 6, now.day);
+        _fromDate = DateTime(_today.year, _today.month - 6, _today.day);
       } else if (preset == '1y') {
-        _fromDate = DateTime(now.year - 1, now.month, now.day);
+        _fromDate = DateTime(_today.year - 1, _today.month, _today.day);
       }
+      
+      // Normalize _fromDate after calculation
+      _fromDate = DateTime(_fromDate.year, _fromDate.month, _fromDate.day);
     });
   }
 
@@ -47,17 +50,18 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
     final initialDate = isFrom ? _fromDate : _toDate;
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initialDate.isAfter(_today) ? _today : initialDate,
+      initialDate: initialDate,
       firstDate: _maxBackDate,
       lastDate: _today,
     );
 
     if (picked != null) {
       setState(() {
+        final normalized = DateTime(picked.year, picked.month, picked.day);
         if (isFrom) {
-          _fromDate = picked;
+          _fromDate = normalized;
         } else {
-          _toDate = picked;
+          _toDate = normalized;
         }
         _selectedPreset = 'other';
       });
@@ -66,8 +70,8 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
 
   bool get _isValidRange {
     return (_fromDate.isBefore(_toDate) || _fromDate.isAtSameMomentAs(_toDate)) &&
-           !_fromDate.isAfter(_today) &&
-           !_toDate.isAfter(_today);
+           (_fromDate.isBefore(_today) || _fromDate.isAtSameMomentAs(_today)) &&
+           (_toDate.isBefore(_today) || _toDate.isAtSameMomentAs(_today));
   }
 
   String? get _errorText {
@@ -92,8 +96,11 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
     double income = 0;
     double expense = 0;
     for (var t in transactions) {
-      if (t.isIncome) income += t.amount;
-      else expense += t.amount;
+      if (t.isIncome) {
+        income += t.amount;
+      } else {
+        expense += t.amount;
+      }
     }
 
     final rangeTitle = _selectedPreset == 'other'
@@ -134,7 +141,6 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -182,7 +188,7 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
               _buildPresetChip(context, '3m', 'Last 3 Months'),
               _buildPresetChip(context, '6m', 'Last 6 Months'),
               _buildPresetChip(context, '1y', 'Last 1 Year'),
-              _buildPresetChip(context, 'other', 'Other (Custom)'),
+              _buildPresetChip(context, 'other', 'Custom'),
             ],
           ),
           
@@ -209,15 +215,18 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
               Expanded(
                 child: BounceButton(
                   onTap: _isValidRange ? () => _handleExport(isPrint: true) : null,
-                  child: ElevatedButton.icon(
-                    onPressed: null, // Handled by BounceButton
-                    icon: const Icon(Icons.print),
-                    label: const Text('Print'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: IgnorePointer(
+                    ignoring: _isValidRange,
+                    child: ElevatedButton.icon(
+                      onPressed: _isValidRange ? () {} : null, // Enabled visually if range is valid
+                      icon: const Icon(Icons.print),
+                      label: const Text('Print'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ),
                 ),
@@ -226,15 +235,18 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
               Expanded(
                 child: BounceButton(
                   onTap: _isValidRange ? () => _handleExport(isPrint: false) : null,
-                  child: ElevatedButton.icon(
-                    onPressed: null, // Handled by BounceButton
-                    icon: const Icon(Icons.save_alt),
-                    label: const Text('Save PDF'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: IgnorePointer(
+                    ignoring: _isValidRange,
+                    child: ElevatedButton.icon(
+                      onPressed: _isValidRange ? () {} : null, // Enabled visually if range is valid
+                      icon: const Icon(Icons.save_alt),
+                      label: const Text('Save PDF'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ),
                 ),
@@ -264,7 +276,7 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
           }
         }
       },
-      selectedColor: Colors.blue.withOpacity(isDark ? 0.3 : 0.1),
+      selectedColor: Colors.blue.withValues(alpha: isDark ? 0.3 : 0.1),
       checkmarkColor: Colors.blue,
       labelStyle: TextStyle(
         color: isSelected 
@@ -304,7 +316,7 @@ class _StatementExportDialogState extends State<StatementExportDialog> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.05),
               border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade300),
               borderRadius: BorderRadius.circular(12),
             ),

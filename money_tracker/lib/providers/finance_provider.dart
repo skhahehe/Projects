@@ -7,6 +7,7 @@ import '../models/category_model.dart';
 class FinanceProvider with ChangeNotifier {
   List<TransactionModel> _transactions = [];
   List<CategoryModel> _categories = [];
+  Map<String, String?> _userImages = {};
   double _balance = 0;
 
   // Settings & Users
@@ -18,6 +19,8 @@ class FinanceProvider with ChangeNotifier {
   List<TransactionModel> get transactions => _transactions;
   List<CategoryModel> get categories => _categories;
   double get balance => _balance;
+  Map<String, String?> get userImages => _userImages;
+  String? get currentUserImage => _userImages[_currentUser];
 
   ThemeMode get themeMode => _themeMode;
   List<String> get users => _users;
@@ -54,6 +57,12 @@ class FinanceProvider with ChangeNotifier {
     _users = prefs.getStringList('users_list') ?? ['Default User'];
     _currentUser = prefs.getString('current_user') ?? _users.first;
     _startDayOfMonth = prefs.getInt('startDayOfMonth') ?? 1;
+
+    final imagesJson = prefs.getString('user_images');
+    if (imagesJson != null) {
+      _userImages = Map<String, String?>.from(jsonDecode(imagesJson));
+    }
+
     notifyListeners();
   }
 
@@ -144,6 +153,13 @@ class FinanceProvider with ChangeNotifier {
         _balance -= t.amount;
       }
     }
+    notifyListeners();
+  }
+
+  Future<void> setUserImage(String name, String? path) async {
+    _userImages[name] = path;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_images', jsonEncode(_userImages));
     notifyListeners();
   }
 
@@ -239,6 +255,15 @@ class FinanceProvider with ChangeNotifier {
     return sorted.take(count).toList();
   }
 
+  List<TransactionModel> getTransactionsInPastDays(int days) {
+    final now = DateTime.now();
+    final cutoff = DateTime(now.year, now.month, now.day).subtract(Duration(days: days - 1));
+    return _transactions
+        .where((t) => t.date.isAfter(cutoff) || (t.date.year == cutoff.year && t.date.month == cutoff.month && t.date.day == cutoff.day))
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+  }
+
   List<TransactionModel> getTransactionsByMonth(int year, int month) {
     final filtered = _transactions.where((t) {
       return t.date.year == year && t.date.month == month;
@@ -248,12 +273,11 @@ class FinanceProvider with ChangeNotifier {
   }
 
   List<int> getAvailableYears() {
-    final years = _transactions.map((t) => t.date.year).toSet().toList();
     final currentYear = DateTime.now().year;
-    if (!years.contains(currentYear)) {
-      years.add(currentYear);
+    final List<int> years = [];
+    for (int i = currentYear; i >= 1900; i--) {
+      years.add(i);
     }
-    years.sort((a, b) => b.compareTo(a));
     return years;
   }
 

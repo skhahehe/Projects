@@ -68,7 +68,7 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
               width: size.width * 0.6,
               height: size.width * 0.6,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
             ),
@@ -89,7 +89,7 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -151,7 +151,7 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
               child: Text(
                 'v1.0.0',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 12,
                   letterSpacing: 1.2,
                 ),

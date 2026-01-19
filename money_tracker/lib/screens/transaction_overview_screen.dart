@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../providers/finance_provider.dart';
 import '../models/transaction_model.dart';
 import '../widgets/monthly_transaction_calendar.dart';
-import '../services/pdf_service.dart';
 import '../widgets/statement_export_dialog.dart';
 import '../widgets/bounce_button.dart';
 
@@ -31,32 +30,6 @@ class _TransactionOverviewScreenState extends State<TransactionOverviewScreen> {
     _selectedMonth = now.month;
   }
 
-  void _nextMonth() {
-    final now = DateTime.now();
-    if (_selectedYear == now.year && _selectedMonth == now.month) {
-      return;
-    }
-
-    setState(() {
-      if (_selectedMonth == 12) {
-        _selectedMonth = 1;
-        _selectedYear++;
-      } else {
-        _selectedMonth++;
-      }
-    });
-  }
-
-  void _prevMonth() {
-    setState(() {
-      if (_selectedMonth == 1) {
-        _selectedMonth = 12;
-        _selectedYear--;
-      } else {
-        _selectedMonth--;
-      }
-    });
-  }
 
   bool _isFutureMonth(int year, int month) {
     final now = DateTime.now();
@@ -148,7 +121,7 @@ class _TransactionOverviewScreenState extends State<TransactionOverviewScreen> {
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 5,
                                   offset: const Offset(0, 2),
                                 ),
@@ -158,7 +131,7 @@ class _TransactionOverviewScreenState extends State<TransactionOverviewScreen> {
                               dense: true,
                               leading: CircleAvatar(
                                 radius: 18,
-                                backgroundColor: t.isIncome ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                                backgroundColor: t.isIncome ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
                                 child: Icon(
                                   t.isIncome ? Icons.keyboard_double_arrow_up : Icons.keyboard_double_arrow_down,
                                   color: t.isIncome ? Colors.green : Colors.red,
@@ -192,80 +165,119 @@ class _TransactionOverviewScreenState extends State<TransactionOverviewScreen> {
   }
 
   Widget _buildCalendarHeader(List<int> availableYears) {
-    final now = DateTime.now();
-    final bool isAtCurrentMonth = _selectedYear == now.year && _selectedMonth == now.month;
+    // Show only first 4 specialized chips, then a dropdown for the rest
+    final List<int> recentYears = availableYears.take(4).toList();
+    final List<int> olderYears = availableYears.skip(4).toList();
+    final bool isOlderSelected = olderYears.contains(_selectedYear);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left, size: 20),
-            onPressed: _prevMonth,
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                DropdownButton<int>(
-                  value: _selectedMonth,
-                  underline: const SizedBox(),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
-                  items: List.generate(12, (index) {
-                    final monthIdx = index + 1;
-                    final bool isFuture = _isFutureMonth(_selectedYear, monthIdx);
-                    return DropdownMenuItem(
-                      value: monthIdx,
-                      enabled: !isFuture,
-                      child: Text(
-                        _months[index],
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isFuture ? Colors.grey : null,
-                        ),
-                      ),
-                    );
-                  }),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedMonth = val);
-                  },
-                ),
-                const SizedBox(width: 4),
-                DropdownButton<int>(
-                  value: _selectedYear,
-                  underline: const SizedBox(),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
-                  items: availableYears.map((year) {
-                    return DropdownMenuItem(
-                      value: year,
-                      child: Text(year.toString()),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() {
-                        _selectedYear = val;
-                        if (_isFutureMonth(_selectedYear, _selectedMonth)) {
-                          _selectedMonth = 1;
+    return Column(
+      children: [
+        // Year Selector
+        Container(
+          height: 50,
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            children: [
+              ...recentYears.map((year) {
+                final isSelected = _selectedYear == year;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(year.toString(), style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _selectedYear = year;
+                          if (_isFutureMonth(_selectedYear, _selectedMonth)) {
+                            _selectedMonth = DateTime.now().month;
+                          }
+                        });
+                      }
+                    },
+                    selectedColor: Colors.blue.withValues(alpha: 0.2),
+                    labelStyle: TextStyle(color: isSelected ? Colors.blue : Colors.grey),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    side: BorderSide(color: isSelected ? Colors.blue : Colors.transparent),
+                    showCheckmark: false,
+                  ),
+                );
+              }),
+              // Older Years Dropdown
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: isOlderSelected ? Colors.blue.withValues(alpha: 0.2) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: isOlderSelected ? Colors.blue : Colors.grey.withValues(alpha: 0.3)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: isOlderSelected ? _selectedYear : null,
+                      hint: Text('More...', style: TextStyle(color: isOlderSelected ? Colors.blue : Colors.grey, fontSize: 13)),
+                      icon: Icon(Icons.arrow_drop_down, color: isOlderSelected ? Colors.blue : Colors.grey),
+                      menuMaxHeight: 300, // Vertically scrollable
+                      items: olderYears.map((year) {
+                        return DropdownMenuItem(
+                          value: year,
+                          child: Text(year.toString(), style: const TextStyle(fontSize: 14)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedYear = val;
+                            if (_isFutureMonth(_selectedYear, _selectedMonth)) {
+                              _selectedMonth = DateTime.now().month;
+                            }
+                          });
                         }
-                      });
-                    }
-                  },
+                      },
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right, size: 20),
-            onPressed: isAtCurrentMonth ? null : _nextMonth,
-            color: isAtCurrentMonth ? Colors.grey : null,
+        ),
+        // Month Selector
+        Container(
+          height: 50,
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: 12,
+            itemBuilder: (context, index) {
+              final monthIdx = index + 1;
+              final isSelected = _selectedMonth == monthIdx;
+              final bool isFuture = _isFutureMonth(_selectedYear, monthIdx);
+              
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ChoiceChip(
+                  label: Text(_months[index], style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                  selected: isSelected,
+                  onSelected: isFuture ? null : (selected) {
+                    if (selected) setState(() => _selectedMonth = monthIdx);
+                  },
+                  selectedColor: Colors.blue.withValues(alpha: 0.2),
+                  labelStyle: TextStyle(
+                    color: isFuture ? Colors.grey.withValues(alpha: 0.5) : (isSelected ? Colors.blue : Colors.grey),
+                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  side: BorderSide(color: isSelected ? Colors.blue : Colors.transparent),
+                  showCheckmark: false,
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
