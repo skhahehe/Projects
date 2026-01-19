@@ -43,3 +43,25 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Sensitive information
+.env*
+*.jks
+*.keystore
+key.properties
+google-services.json
+GoogleService-Info.plist
+
+# iOS/macOS ephemeral/signing files
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/App.framework
+**/ios/Flutter/App.podspec
+**/macos/Flutter/ephemeral/
+**/ios/Pods/
+*.mobileprovision
+*.p12
+
+# Desktop
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
