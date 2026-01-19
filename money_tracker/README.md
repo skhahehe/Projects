@@ -1,24 +1,24 @@
 
 ## Features
 
-### 💰 Comprehensive Expense Tracking
+###  Comprehensive Expense Tracking
 - **Transaction Management**: Easily record income and expenses with precise amounts and dates.
 - **Smart Categorization**: Organize your spending into customizable categories like Food, Travel, Utilities, and more.
 - **Instant Overview**: Get a clear snapshot of your financial health directly from the home screen.
 
-### 📊 Powerful Analytics
+###  Powerful Analytics
 - **Visual Reports**: Understand your spending patterns with intuitive charts and graphs.
 - **Spending Trends**: Track how your expenses change over time to identify saving opportunities.
 - **Detailed Breakdowns**: View transaction history with advanced filtering and search capabilities.
 
-### 📄 Professional Exporting
+###  Professional Exporting
 - **PDF Reports**: Generate and export professional PDF statements of your transactions for records or sharing.
 
-### 🔒 Secure & Private
+###  Secure & Private
 - **Local Storage**: Your sensitive financial data stays on your device, ensuring maximum privacy.
 - **Offline Access**: Manage your money anytime, anywhere, without needing an internet connection.
 
-### 📱 Multi-Platform Support
+###  Multi-Platform Support
 Built with Flutter, providing a seamless experience across:
 - **Mobile**: Android & iOS
 - **Desktop**: Windows, macOS, & Linux
