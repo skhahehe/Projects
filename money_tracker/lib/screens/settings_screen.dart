@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../providers/finance_provider.dart';
+import '../services/backup_service.dart';
 import '../widgets/bounce_button.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -23,6 +24,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (result != null && result.files.single.path != null) {
       finance.setUserImage(finance.currentUser, result.files.single.path);
+    }
+  }
+
+  Future<void> _handleExport(BuildContext context) async {
+    final success = await BackupService.exportBackup();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? 'Backup exported successfully!' : 'Failed to export backup.'),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleImport(BuildContext context, FinanceProvider finance) async {
+    final success = await BackupService.importBackup();
+    if (mounted) {
+      if (success) {
+        await finance.refreshAllData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Backup imported successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to import backup.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -186,6 +221,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
+              _buildSectionHeader('Data Management'),
+              Card(
+                child: Column(
+                  children: [
+                    BounceButton(
+                      onTap: () => _handleExport(context),
+                      child: const ListTile(
+                        leading: Icon(Icons.upload_file, color: Colors.blue),
+                        title: Text('Export Backup'),
+                        subtitle: Text('Save all data to a text file'),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    BounceButton(
+                      onTap: () => _handleImport(context, finance),
+                      child: const ListTile(
+                        leading: Icon(Icons.download, color: Colors.orange),
+                        title: Text('Import Backup'),
+                        subtitle: Text('Restore data from a backup file'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
             ],
           );
         },

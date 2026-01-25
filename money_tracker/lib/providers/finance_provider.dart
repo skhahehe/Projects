@@ -36,6 +36,11 @@ class FinanceProvider with ChangeNotifier {
     await _loadUserData();
   }
 
+  Future<void> refreshAllData() async {
+    await _init();
+    notifyListeners();
+  }
+
   // --- Core Utility: Date Normalization & Validation ---
 
   DateTime _normalizeDate(DateTime date) {
